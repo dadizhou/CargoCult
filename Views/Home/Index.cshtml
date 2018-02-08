@@ -17,12 +17,14 @@
         <script>
             function myMap() {
 
-                var locations = [
-                    ['Melbourne CBD', -37.813611, 144.963056],
-                    ['Flagstaff Gardens', -37.8111635, 144.9544162]
-                ];
+                var locations = [];
+                var locationsRaw = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.Locations));
 
-                var mapCenter = new google.maps.LatLng(-37.813611, 144.963056);
+                for (var i = 0; i < locationsRaw.length; i++) {
+                    locations.push([locationsRaw[i].Name, locationsRaw[i].Lat, locationsRaw[i].Lng]);
+                }
+
+                var mapCenter = new google.maps.LatLng(locations[0][1], locations[0][2]);
                 var mapProp = { center: mapCenter, zoom: 15, scrollwheel: true, draggable: true, mapTypeId: google.maps.MapTypeId.ROADMAP };
                 var map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
 
