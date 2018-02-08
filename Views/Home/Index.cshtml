@@ -1,0 +1,28 @@
+﻿@{ Layout = null; }
+
+<!DOCTYPE html>
+<head>
+    <title>Test</title>
+</head>
+
+<body>
+    <h2>Test Map</h2>
+    <fieldset>
+        <legend>Melbourne Home</legend>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+        <div id="googleMap" style="height:400px;width:100%;"></div>
+        <script>
+            function myMap() {
+                var myCenter = new google.maps.LatLng(-37.813611, 144.963056);
+                var mapProp = { center: myCenter, zoom: 12, scrollwheel: true, draggable: true, mapTypeId: google.maps.MapTypeId.ROADMAP };
+                var map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
+                var marker = new google.maps.Marker({ position: myCenter });
+                marker.setMap(map);
+            }
+        </script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDMGtyp-NB3OZ5z20vu3J90kkxGYXmdE2w&callback=myMap"></script>
+    </fieldset>
+</body>
