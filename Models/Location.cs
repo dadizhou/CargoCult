@@ -1,9 +1,11 @@
-﻿namespace CargoCult.Models
+﻿using Microsoft.Spatial;
+
+namespace CargoCult.Models
 {
     public class Location
     {
+        public int LocationID { get; set; }
         public string Name { get; set; }
-        public double Lat { get; set; }
-        public double Lng { get; set; }
+        public GeographyPoint Position {get;set;}
     }
 }

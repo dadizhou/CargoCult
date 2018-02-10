@@ -16,22 +16,21 @@
         <div id="googleMap" style="height:400px;width:100%;"></div>
         <script>
             function myMap() {
-
                 var locations = [];
                 var locationsRaw = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.Locations));
 
                 for (var i = 0; i < locationsRaw.length; i++) {
-                    locations.push([locationsRaw[i].Name, locationsRaw[i].Lat, locationsRaw[i].Lng]);
+                    locations.push([locationsRaw[i].Name, locationsRaw[i].Position.Latitude, locationsRaw[i].Position.Longitude]);
                 }
 
                 var mapCenter = new google.maps.LatLng(locations[0][1], locations[0][2]);
-                var mapProp = { center: mapCenter, zoom: 15, scrollwheel: true, draggable: true, mapTypeId: google.maps.MapTypeId.ROADMAP };
+                var mapProp = { center: mapCenter, zoom: 6, scrollwheel: true, draggable: true, mapTypeId: google.maps.MapTypeId.ROADMAP };
                 var map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
 
                 var infowindow = new google.maps.InfoWindow();
 
+                // populate locations collection
                 var marker, i;
-
                 for (i = 0; i < locations.length; i++) {
                     marker = new google.maps.Marker({
                         position: new google.maps.LatLng(locations[i][1], locations[i][2]),
@@ -45,6 +44,65 @@
                         }
                     })(marker, i));
                 }
+
+                // draw circle
+                var cityCircle = new google.maps.Circle({
+                    strokeColor: '#FF0000',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: '#FF0000',
+                    fillOpacity: 0.35,
+                    map: map,
+                    center: mapCenter,
+                    radius: 808
+                });
+
+
+                // geo search functions group
+                function success(p) {
+
+                    // place marker according to current location
+                    position = p;
+                    marker = new google.maps.Marker({
+                        position: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+                        map: map
+                    });
+
+                    google.maps.event.addListener(marker, 'click', (function (marker) {
+                        return function () {
+                            infowindow.setContent('test');
+                            infowindow.open(map, marker);
+                        }
+                    })(marker));
+
+                    // pass currrent location to controller
+                    alert(JSON.stringify(position.coords.latitude));
+                    jQuery.ajax({
+                        type: "POST",
+                        url: "@Url.Action("GetCurrentLocation")",
+                        data: { 'latitude': position.coords.latitude, 'longitude': position.coords.longitude},
+                        success: function (data) {
+                            alert(data);
+                        },
+                        failure: function (errMsg) {
+                            alert(errMsg);
+                        }
+                    });
+                }
+
+                function error(msg) {
+                    if (msg.message.indexOf("Only secure origins are allowed") == 0) {
+                        alert('https');
+                    }
+                }
+
+                var geo_options = {
+                    enableHighAccuracy: true,
+                    maximumAge: 30000,
+                    timeout: 27000
+                };
+
+                navigator.geolocation.getCurrentPosition(success, error, geo_options);
             }
         </script>
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDMGtyp-NB3OZ5z20vu3J90kkxGYXmdE2w&callback=myMap"></script>
