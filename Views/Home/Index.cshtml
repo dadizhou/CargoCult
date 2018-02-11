@@ -7,102 +7,163 @@
 
 <body>
     <h2>Test Map</h2>
+
+    <form asp-action="Index" method="post">
+        <p>
+            <!-- text box which accepts search radius. precision is set to meters (0.001km) at the moment -->
+            <label>Search Radius (km):</label>
+            <input type="number" step="0.001" name="searchRadius" id="SearchRadius"/>
+            <button type="button" onclick="clickHandler()">Search</button>
+        </p>
+    </form>
+
+    <script>
+        function clickHandler() {
+            var searchRadius = $("#SearchRadius").val();
+
+            navigator.geolocation.getCurrentPosition(success, error, geo_options);
+            function success(position) {
+                jQuery.ajax({
+                    type: "POST",
+                    url: "@Url.Action("SearchByRadius")",
+                    data: { 'latitude': position.coords.latitude, 'longitude': position.coords.longitude, 'searchRadius': searchRadius },
+                    success: function (data) {
+                        window.location.href = data.redirectToUrl;;
+                    },
+                    failure: function (errMsg) {
+                        alert(errMsg);
+                    }
+                });
+            }
+
+            function error(msg) {
+                if (msg.message.indexOf("Only secure origins are allowed") == 0) {
+                    alert('https');
+                }
+            }
+
+            var geo_options = {
+                enableHighAccuracy: true,
+                maximumAge: 30000,
+                timeout: 27000
+            };
+            return;
+        }
+    </script>
+
     <fieldset>
         <legend>Melbourne Home</legend>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-        <div id="googleMap" style="height:400px;width:100%;"></div>
+        <div id="googleMap" style="height:500px;width:100%;"></div>
         <script>
             function myMap() {
-                var locations = [];
-                var locationsRaw = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.Locations));
-
-                for (var i = 0; i < locationsRaw.length; i++) {
-                    locations.push([locationsRaw[i].Name, locationsRaw[i].Position.Latitude, locationsRaw[i].Position.Longitude]);
-                }
-
-                var mapCenter = new google.maps.LatLng(locations[0][1], locations[0][2]);
-                var mapProp = { center: mapCenter, zoom: 6, scrollwheel: true, draggable: true, mapTypeId: google.maps.MapTypeId.ROADMAP };
-                var map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
+                // TODO: zoom logic
+                var mapProperties = { zoom: 14, scrollwheel: true, draggable: true, mapTypeId: google.maps.MapTypeId.ROADMAP };
+                var map = new google.maps.Map(document.getElementById("googleMap"), mapProperties);
 
                 var infowindow = new google.maps.InfoWindow();
 
-                // populate locations collection
-                var marker, i;
-                for (i = 0; i < locations.length; i++) {
-                    marker = new google.maps.Marker({
-                        position: new google.maps.LatLng(locations[i][1], locations[i][2]),
-                        map: map
-                    });
+                var viewBagStuff = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag));
 
-                    google.maps.event.addListener(marker, 'click', (function (marker, i) {
-                        return function () {
-                            infowindow.setContent(locations[i][0]);
-                            infowindow.open(map, marker);
-                        }
-                    })(marker, i));
-                }
+                // if no locations populated in ViewBag:
+                //     1. place a marker for current location.
+                //     2. update the controller for current location.
+                // else
+                //     1. populate markers for all locations.
+                //     2. draw a circle according to search radius.
+                if (viewBagStuff.Locations == null) {
+                    // geo search functions group:
+                    // 1. get current position according to the navigator in use
+                    // 2. success and error callback functions
+                    // 3. options to set accuracy, timeout, etc etc
 
-                // draw circle
-                var cityCircle = new google.maps.Circle({
-                    strokeColor: '#FF0000',
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                    fillColor: '#FF0000',
-                    fillOpacity: 0.35,
-                    map: map,
-                    center: mapCenter,
-                    radius: 808
-                });
+                    // 1.1 get position
+                    navigator.geolocation.getCurrentPosition(success, error, geo_options);
 
+                    // 2.1 success callback
+                    function success(position) {
+                        // set map center according to current location
+                        var mapCenter = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                        map.setCenter(mapCenter);
 
-                // geo search functions group
-                function success(p) {
+                        // place a marker for current location
+                        marker = new google.maps.Marker({
+                            position: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+                            map: map
+                        });
 
-                    // place marker according to current location
-                    position = p;
-                    marker = new google.maps.Marker({
-                        position: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
-                        map: map
-                    });
-
-                    google.maps.event.addListener(marker, 'click', (function (marker) {
-                        return function () {
-                            infowindow.setContent('test');
-                            infowindow.open(map, marker);
-                        }
-                    })(marker));
-
-                    // pass currrent location to controller
-                    alert(JSON.stringify(position.coords.latitude));
-                    jQuery.ajax({
-                        type: "POST",
-                        url: "@Url.Action("GetCurrentLocation")",
-                        data: { 'latitude': position.coords.latitude, 'longitude': position.coords.longitude},
-                        success: function (data) {
-                            alert(data);
-                        },
-                        failure: function (errMsg) {
-                            alert(errMsg);
-                        }
-                    });
-                }
-
-                function error(msg) {
-                    if (msg.message.indexOf("Only secure origins are allowed") == 0) {
-                        alert('https');
+                        // place an event handler to handle when user clicks the marker
+                        google.maps.event.addListener(marker, 'click', (function (marker) {
+                            return function () {
+                                var currentLocationInfo =
+                                    '<div>' +
+                                    '<strong>' + 'Current Location' + '</strong>' +
+                                    '<br>' +
+                                    'Latitude: ' + position.coords.latitude +
+                                    '<br>' +
+                                    'Longitude: ' + position.coords.longitude +
+                                    '</div>'
+                                infowindow.setContent(currentLocationInfo);
+                                infowindow.open(map, marker);
+                            }
+                        })(marker));
                     }
+
+                    // 2.2 error callback
+                    function error(msg) {
+                        if (msg.message.indexOf("Only secure origins are allowed") == 0) {
+                            alert('https');
+                        }
+                    }
+
+                    // 3.1 options
+                    var geo_options = {
+                        enableHighAccuracy: true,
+                        maximumAge: 30000,
+                        timeout: 27000
+                    };
+                    return;
+                } else {
+                    var locationsRaw = viewBagStuff.Locations;
+                    var searchRadiusRaw = viewBagStuff.SearchRadius;
+                    var locations = [];
+
+                    for (var i = 0; i < locationsRaw.length; i++) {
+                        locations.push([locationsRaw[i].Name, locationsRaw[i].Position.Latitude, locationsRaw[i].Position.Longitude]);
+                    }
+
+                    var mapCenter = new google.maps.LatLng(locations[0][1], locations[0][2]);
+                    map.setCenter(mapCenter);
+
+                    var marker, i;
+                    for (i = 0; i < locations.length; i++) {
+                        marker = new google.maps.Marker({
+                            position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+                            map: map
+                        });
+
+                        google.maps.event.addListener(marker, 'click', (function (marker, i) {
+                            return function () {
+                                infowindow.setContent(locations[i][0]);
+                                infowindow.open(map, marker);
+                            }
+                        })(marker, i));
+                    }
+
+                    var cityCircle = new google.maps.Circle({
+                        strokeColor: '#FF0000',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: '#FF0000',
+                        fillOpacity: 0.35,
+                        map: map,
+                        center: mapCenter,
+                        radius: searchRadiusRaw * 1000
+                    });
                 }
-
-                var geo_options = {
-                    enableHighAccuracy: true,
-                    maximumAge: 30000,
-                    timeout: 27000
-                };
-
-                navigator.geolocation.getCurrentPosition(success, error, geo_options);
             }
         </script>
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDMGtyp-NB3OZ5z20vu3J90kkxGYXmdE2w&callback=myMap"></script>

@@ -6,13 +6,21 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using CargoCult.Data;
+using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
 
 namespace CargoCult
 {
     public class Startup
     {
+        public IConfiguration Config { get; }
+        public Startup(IConfiguration config) => Config = config;
+
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<MainDBContext>(options => options.UseSqlServer(Config["Data:CargoCult:ConnectionString"]));
+            services.AddTransient<IMainDBRepository, MainDBRepository>();
             services.AddMvc();
         }
 
@@ -21,8 +29,10 @@ namespace CargoCult
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseMvcWithDefaultRoute();
             }
+
+            app.UseMvcWithDefaultRoute();
+            SeedData.InitialiseDatabase(app);
         }
     }
 }
