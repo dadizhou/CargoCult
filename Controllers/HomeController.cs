@@ -1,20 +1,22 @@
-using Microsoft.AspNetCore.Mvc;
-using CargoCult.Models;
-using System.Collections.Generic;
-using Microsoft.Spatial;
 using CargoCult.Data;
-using System.Linq;
 using CargoCult.ExtensionClasses;
-using Microsoft.AspNetCore.Http;
+using CargoCult.Models;
+using CargoCult.HelperClasses;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Spatial;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CargoCult.Controllers
 {
     public class HomeController : Controller
     {
         private IMainDBRepository repository;
-        public HomeController(IMainDBRepository repo)
+        private ILocationSearch locationSearch;
+        public HomeController(IMainDBRepository repo, ILocationSearch loc)
         {
             repository = repo;
+            locationSearch = loc;
         }
 
         public ActionResult Index()
@@ -36,7 +38,7 @@ namespace CargoCult.Controllers
 
                 viewLocations.Add(currentLocation);
 
-                viewLocations.AddRange(from l in repository.Locations where l.Position.Distance(currentLocation.Position) < (double)searchRadius select l);
+                viewLocations.AddRange(locationSearch.Locations(currentLocation, (double)searchRadius));
 
                 ViewBag.Locations = viewLocations;
                 ViewBag.SearchRadius = searchRadius;
