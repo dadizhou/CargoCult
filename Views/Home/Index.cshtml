@@ -19,13 +19,13 @@
 
     <script>
         function clickHandler() {
-            var searchRadius = $("#SearchRadius").val();
+            var searchRadius = $('#SearchRadius').val();
 
             navigator.geolocation.getCurrentPosition(success, error, geo_options);
             function success(position) {
                 jQuery.ajax({
-                    type: "POST",
-                    url: "@Url.Action("SearchByRadius")",
+                    type: 'POST',
+                    url: '@Url.Action("SearchByRadius")',
                     data: { 'latitude': position.coords.latitude, 'longitude': position.coords.longitude, 'searchRadius': searchRadius },
                     success: function (data) {
                         window.location.href = data.redirectToUrl;;
@@ -37,7 +37,7 @@
             }
 
             function error(msg) {
-                if (msg.message.indexOf("Only secure origins are allowed") == 0) {
+                if (msg.message.indexOf('Only secure origins are allowed') == 0) {
                     alert('https');
                 }
             }
@@ -62,7 +62,7 @@
             function myMap() {
                 // TODO: zoom logic
                 var mapProperties = { zoom: 14, scrollwheel: true, draggable: true, mapTypeId: google.maps.MapTypeId.ROADMAP };
-                var map = new google.maps.Map(document.getElementById("googleMap"), mapProperties);
+                var map = new google.maps.Map(document.getElementById('googleMap'), mapProperties);
 
                 var infowindow = new google.maps.InfoWindow();
 
@@ -114,7 +114,7 @@
 
                     // 2.2 error callback
                     function error(msg) {
-                        if (msg.message.indexOf("Only secure origins are allowed") == 0) {
+                        if (msg.message.indexOf('Only secure origins are allowed') == 0) {
                             alert('https');
                         }
                     }
