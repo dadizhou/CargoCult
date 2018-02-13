@@ -102,6 +102,8 @@
                                     '<div>' +
                                     '<strong>' + 'Current Location' + '</strong>' +
                                     '<br>' +
+                                    'Notes: ' + 'Current locatoin lat lon' +
+                                    '<br>' +
                                     'Latitude: ' + position.coords.latitude +
                                     '<br>' +
                                     'Longitude: ' + position.coords.longitude +
@@ -132,22 +134,34 @@
                     var locations = [];
 
                     for (var i = 0; i < locationsRaw.length; i++) {
-                        locations.push([locationsRaw[i].Name, locationsRaw[i].Position.Latitude, locationsRaw[i].Position.Longitude]);
+                        locations.push([locationsRaw[i].Title, locationsRaw[i].Description, locationsRaw[i].Position.Latitude, locationsRaw[i].Position.Longitude]);
                     }
 
-                    var mapCenter = new google.maps.LatLng(locations[0][1], locations[0][2]);
+                    // at the moment, always the first item in the collection
+                    // it's the current location anyway.
+                    var mapCenter = new google.maps.LatLng(locations[0][2], locations[0][3]);
                     map.setCenter(mapCenter);
 
                     var marker, i;
                     for (i = 0; i < locations.length; i++) {
                         marker = new google.maps.Marker({
-                            position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+                            position: new google.maps.LatLng(locations[i][2], locations[i][3]),
                             map: map
                         });
 
                         google.maps.event.addListener(marker, 'click', (function (marker, i) {
                             return function () {
-                                infowindow.setContent(locations[i][0]);
+                                var currentLocationInfo =
+                                    '<div>' +
+                                    '<strong>' + locations[i][0] + '</strong>' +
+                                    '<br>' +
+                                    'Notes: ' + locations[i][1] +
+                                    '<br>' +
+                                    'Latitude: ' + locations[i][2] +
+                                    '<br>' +
+                                    'Longitude: ' + locations[i][3] +
+                                    '</div>'
+                                infowindow.setContent(currentLocationInfo);
                                 infowindow.open(map, marker);
                             }
                         })(marker, i));

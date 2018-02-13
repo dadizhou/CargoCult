@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using CargoCult.Data;
+using CargoCult.Data.Seeding;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using CargoCult.HelperClasses;
@@ -22,7 +23,7 @@ namespace CargoCult
         {
             services.AddDbContext<MainDBContext>(options => options.UseSqlServer(Config["Data:CargoCult:ConnectionString"]));
             services.AddTransient<IMainDBRepository, MainDBRepository>();
-            services.AddTransient<ILocationSearch, LocationSearchByFormula>();
+            services.AddTransient<ILocationSearch, LocationSearchBySTDistance>();
             services.AddMvc();
         }
 

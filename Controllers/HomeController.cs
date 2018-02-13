@@ -31,7 +31,8 @@ namespace CargoCult.Controllers
 
                 var currentLocation = new Location
                 {
-                    Name = "current location",
+                    Title = "Current Location",
+                    Description = "Current location lat lon",
                     Latitude = (double)latitude,
                     Longitude = (double)longitude
                 };
