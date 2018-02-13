@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using CargoCult.Models;
 
-namespace CargoCult.Data
+namespace CargoCult.HelperClasses
 {
     public interface ILocationSearch
     {

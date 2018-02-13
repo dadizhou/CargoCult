@@ -5,14 +5,13 @@ using System.Threading.Tasks;
 using CargoCult.Data;
 using CargoCult.Models;
 using CargoCult.ExtensionClasses;
-using System.Linq;
 
 namespace CargoCult.HelperClasses
 {
-    public class LocationSearch : ILocationSearch
+    public class LocationSearchByFormula : ILocationSearch
     {
         private IMainDBRepository repository;
-        public LocationSearch(IMainDBRepository repo)
+        public LocationSearchByFormula(IMainDBRepository repo)
         {
             repository = repo;
         }

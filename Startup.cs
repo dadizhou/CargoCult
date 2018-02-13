@@ -22,7 +22,7 @@ namespace CargoCult
         {
             services.AddDbContext<MainDBContext>(options => options.UseSqlServer(Config["Data:CargoCult:ConnectionString"]));
             services.AddTransient<IMainDBRepository, MainDBRepository>();
-            services.AddTransient<ILocationSearch, LocationSearch>();
+            services.AddTransient<ILocationSearch, LocationSearchByFormula>();
             services.AddMvc();
         }
 
