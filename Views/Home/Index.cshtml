@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <head>
     <title>Test</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </head>
 
 <body>
@@ -13,12 +14,13 @@
             <!-- text box which accepts search radius. precision is set to meters (0.001km) at the moment -->
             <label>Search Radius (km):</label>
             <input type="number" step="0.001" name="searchRadius" id="SearchRadius"/>
-            <button type="button" onclick="clickHandler()">Search</button>
+            <button type="button" id="btnSearchRadius">Search</button>
         </p>
     </form>
 
     <script>
-        function clickHandler() {
+        $("#btnSearchRadius").click(function(){ 
+        
             var searchRadius = $('#SearchRadius').val();
 
             navigator.geolocation.getCurrentPosition(success, error, geo_options);
@@ -48,7 +50,8 @@
                 timeout: 27000
             };
             return;
-        }
+        
+        });
     </script>
 
     <fieldset>
