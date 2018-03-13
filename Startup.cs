@@ -21,7 +21,15 @@ namespace CargoCult
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<MainDBContext>(options => options.UseSqlServer(Config["Data:CargoCult:ConnectionString"]));
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
+            {
+                services.AddDbContext<MainDBContext>(options => options.UseSqlServer(Config.GetConnectionString("MyDbConnection")));
+            }
+            else
+            {
+                services.AddDbContext<MainDBContext>(options => options.UseSqlServer(Config["Data:CargoCult:ConnectionString"]));
+            }
+
             services.AddTransient<IMainDBRepository, MainDBRepository>();
             services.AddTransient<ILocationSearch, LocationSearchBySTDistance>();
             services.AddMvc();
