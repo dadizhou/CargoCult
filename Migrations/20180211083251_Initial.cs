@@ -13,7 +13,7 @@ namespace CargoCult.Migrations
                 name: "Location",
                 columns: table => new
                 {
-                    LocationID = table.Column<int>(nullable: false)
+                    LocationID = table.Column<long>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Latitude = table.Column<double>(nullable: false),
                     Longitude = table.Column<double>(nullable: false),

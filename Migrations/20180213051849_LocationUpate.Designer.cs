@@ -23,7 +23,7 @@ namespace CargoCult.Migrations
 
             modelBuilder.Entity("CargoCult.Models.Location", b =>
                 {
-                    b.Property<int>("LocationID")
+                    b.Property<long>("LocationID")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Description");
