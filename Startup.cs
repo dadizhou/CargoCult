@@ -11,6 +11,7 @@ using CargoCult.Data.Seeding;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using CargoCult.HelperClasses;
+using Microsoft.AspNetCore.Cors;
 
 namespace CargoCult
 {
@@ -24,10 +25,25 @@ namespace CargoCult
             if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
             {
                 services.AddDbContext<MainDBContext>(options => options.UseSqlServer(Config.GetConnectionString("MyDbConnection")));
+                services.AddCors(options =>
+                {
+                    options.AddPolicy("AllowSpecificOrigin",
+                        builder => builder.WithOrigins("https://cargocultaccess.azurewebsites.net"));
+                });
             }
             else
             {
                 services.AddDbContext<MainDBContext>(options => options.UseSqlServer(Config["Data:CargoCult:ConnectionString"]));
+                services.AddCors(options =>
+                {
+                    options.AddPolicy("AllowSpecificOrigin",
+                        builder => builder
+                                    .AllowAnyOrigin()
+                                    .AllowAnyMethod()
+                                    .AllowAnyHeader()
+                                    .AllowCredentials()
+                                    );
+                });
             }
 
             services.AddTransient<IMainDBRepository, MainDBRepository>();
@@ -42,6 +58,7 @@ namespace CargoCult
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseCors("AllowSpecificOrigin");
             app.UseMvcWithDefaultRoute();
             SeedData.InitialiseDatabase(app);
         }
