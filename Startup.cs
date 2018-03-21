@@ -27,8 +27,11 @@ namespace CargoCult
                 services.AddDbContext<MainDBContext>(options => options.UseSqlServer(Config.GetConnectionString("MyDbConnection")));
                 services.AddCors(options =>
                 {
-                    options.AddPolicy("AllowSpecificOrigin",
-                        builder => builder.WithOrigins("https://cargocultaccess.azurewebsites.net"));
+                options.AddPolicy("AllowSpecificOrigin",
+                    builder => builder.WithOrigins("https://cargocultaccess.azurewebsites.net")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials());
                 });
             }
             else
